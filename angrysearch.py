@@ -18,6 +18,7 @@ import sqlite3
 import subprocess
 import sys
 import time
+import tempfile
 
 # QT RESOURCE FILE WITH MIME ICONS AND DARK GUI THEME ICONS
 # IF NOT AVAILABLE ONLY 2 ICONS REPRESENTING FILE & DIRECTORY ARE USED
@@ -204,7 +205,7 @@ class Thread_delay_db_query(Qc.QThread):
 
 # THREAD FOR UPDATING THE DATABASE
 # PREVENTS LOCKING UP THE GUI AND ALLOWS TO SHOW PROGRESS
-# NEW DATABASE IS CREATED IN /tmp AND REPLACES ONE IN /.cache/angrysearch
+# NEW DATABASE IS CREATED IN TEMP DIR AND REPLACES ONE IN /.cache/angrysearch
 class Thread_database_update(Qc.QThread):
     db_update_signal = Qc.pyqtSignal(str, str)
     crawl_signal = Qc.pyqtSignal(str)
@@ -313,7 +314,7 @@ class Thread_database_update(Qc.QThread):
 
     def new_database(self):
         global con
-        temp_db_path = '/tmp/angry_database.db'
+        temp_db_path = tempfile.gettempdir() + '/angry_database.db'
         tstart = datetime.now()
 
         if os.path.exists(temp_db_path):
@@ -361,7 +362,7 @@ class Thread_database_update(Qc.QThread):
         global con
         global DATABASE_PATH
 
-        temp_db_path = '/tmp/angry_database.db'
+        temp_db_path = tempfile.gettempdir() + '/angry_database.db'
 
         dir_path = os.path.dirname(DATABASE_PATH)
 
@@ -1617,7 +1618,7 @@ class Update_dialog_window(Qw.QDialog):
         self.icon_theme_signal.emit(text)
 
     def exclude_dialog(self):
-        text, ok = Qw.QInputDialog.getText(self, '~/.config/angrysearch/',
+        text, ok = Qw.QInputDialog.getText(self, os.path.expanduser('~') + '/.config/angrysearch/',
                                            'Directories to be ignored:',
                                            Qw.QLineEdit.Normal,
                                            self.exclud_dirs)
@@ -1703,7 +1704,7 @@ def open_database():
     if os.path.exists(DATABASE_PATH):
         return sqlite3.connect(DATABASE_PATH, check_same_thread=False)
     else:
-        temp = '/tmp/angry_database.db'
+        temp = tempfile.gettempdir() + '/angry_database.db'
         if os.path.exists(temp):
             os.remove(temp)
         return sqlite3.connect(temp, check_same_thread=False)
