@@ -742,30 +742,30 @@ class Gui_MainWindow(Qw.QMainWindow):
         else:
             self.set['last_sort'] = [1, 0]
 
-    def read_qsettings_item(self, item, type):
+    def read_qsettings_item(self, item, dtype):
         if self.settings.value(item):
             k = self.settings.value(item)
-            if type == 'bool':
+            if dtype == 'bool':
                 if k.lower() in ['false', 'no', '0', 'n', 'none']:
                     if item == 'fast_search_but_no_substring':
                         item = 'fts'
                     self.set[item] = False
                 else:
                     self.set[item] = True
-            if type == 'str':
+            if dtype == 'str':
                 self.set[item] = k
-            if type == 'int':
-                if k.isdigit():
+            if dtype == 'int':
+                if (type(k) == str and k.isdigit()) or type(k) == int:
                     self.set[item] = int(k)
-            if type == 'list':
+            if dtype == 'list':
                 self.set[item] = shlex.split(k.strip())
-            if type == 'fm':
+            if dtype == 'fm':
                 if k in ['', 'xdg-open']:
                     self.set[item] = self.detect_file_manager()
                 else:
                     self.set[item] = k
         else:
-            if type == 'fm':
+            if dtype == 'fm':
                 self.set[item] = self.detect_file_manager()
 
     def detect_file_manager(self):
